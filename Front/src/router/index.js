@@ -34,8 +34,22 @@ import MarketModify from "@/components/market/MarketModify.vue";
 import MarketAdd from "@/components/market/MarketAdd.vue";
 // 장바구니
 import Basket from "../views/Basket.vue";
+import store from "../store";
 
 Vue.use(VueRouter);
+
+// https://router.vuejs.org/kr/guide/advanced/navigation-guards.html
+const requireAuth = () => (to, from, next) => {
+  //const nextRoute = to.path;
+
+  if (store.getters.getAccessToken !== '') { //로그인 한 사람이면 그 길로 가라
+    console.log(store.getters.getAccessToken);
+    next();
+  } else {
+    console.log(store.getters.getAccessToken); //로그인을 안했다면 로그인페이지로 이동
+    next("/login");
+  }
+};
 
 const routes = [
   {
@@ -49,6 +63,11 @@ const routes = [
     component: Login,
   },
   {
+    path: "/login/:nextRoute",
+    name: "LoginNextRoute",
+    component: Login
+  },
+  {
     path: "/join",
     name: "Join",
     component: Join,
@@ -57,7 +76,6 @@ const routes = [
     path: "/mypage",
     name: "Mypage",
     component: Mypage,
-    redirect: "/mypage/check",
     children: [
       {
         path: "check",
@@ -182,6 +200,7 @@ const routes = [
     path: "/basket",
     name: "Basket",
     component: Basket,
+    beforeEnter: requireAuth(), //들어가기전에 할일
   },
 ];
 
